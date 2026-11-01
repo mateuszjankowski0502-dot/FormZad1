@@ -2,6 +2,7 @@ package com.example.zapisyzad1;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,6 +13,7 @@ import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -76,7 +78,12 @@ public class MainActivity extends AppCompatActivity {
                 btnSubmit.setEnabled(isChecked));
 
         btnBirthDate.setOnClickListener(v -> showDatePicker());
-        btnSubmit.setOnClickListener(v -> showSummary());
+
+        btnSubmit.setOnClickListener(v -> {
+            if (validateForm()) {
+                showSummary();
+            }
+        });
 
         sbLevel.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
@@ -112,20 +119,57 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private boolean validateForm() {
+        String name = etName.getText().toString().trim();
+
+        if (name.isEmpty()) {
+            etName.setError(getString(R.string.error_name));
+            etName.requestFocus();
+            return false;
+        }
+
+        String email = etEmail.getText().toString().trim();
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError(getString(R.string.error_email));
+            etEmail.requestFocus();
+            return false;
+        }
+
+        if (birthDate.isEmpty()) {
+            Toast.makeText(this, R.string.error_date,
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (spCourse.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, R.string.error_course,
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (rgMode.getCheckedRadioButtonId() == -1) {
+            Toast.makeText(this, R.string.error_mode,
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (!cbTerms.isChecked()) {
+            Toast.makeText(this, R.string.error_terms,
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+
     private void showSummary() {
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
 
-        String mode = "Nie wybrano";
-        int checkedId = rgMode.getCheckedRadioButtonId();
-
-        if (checkedId == R.id.rbOnsite) {
-            mode = getString(R.string.mode_onsite);
-        } else if (checkedId == R.id.rbRemote) {
-            mode = getString(R.string.mode_remote);
-        }
-
-        String course = spCourse.getSelectedItem().toString();
+        String mode = rgMode.getCheckedRadioButtonId() == R.id.rbOnsite
+                ? getString(R.string.mode_onsite)
+                : getString(R.string.mode_remote);
 
         String newsletter = swNewsletter.isChecked()
                 ? getString(R.string.yes_short)
@@ -135,8 +179,8 @@ public class MainActivity extends AppCompatActivity {
                 R.string.summary_format,
                 name,
                 email,
-                birthDate.isEmpty() ? "Nie wybrano" : birthDate,
-                course,
+                birthDate,
+                spCourse.getSelectedItem().toString(),
                 mode,
                 sbLevel.getProgress(),
                 newsletter
