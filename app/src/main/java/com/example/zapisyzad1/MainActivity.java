@@ -2,7 +2,6 @@ package com.example.zapisyzad1;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,28 +12,22 @@ import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText etName;
-    private EditText etEmail;
-    private Button btnBirthDate;
-    private Button btnSubmit;
+    private EditText etName, etEmail;
+    private Button btnBirthDate, btnSubmit;
     private Spinner spCourse;
     private RadioGroup rgMode;
     private SeekBar sbLevel;
-    private TextView tvLevelValue;
-    private TextView tvSummary;
+    private TextView tvLevelValue, tvSummary;
     private MaterialSwitch swNewsletter;
     private CheckBox cbTerms;
 
@@ -57,8 +50,25 @@ public class MainActivity extends AppCompatActivity {
         swNewsletter = findViewById(R.id.swNewsletter);
         cbTerms = findViewById(R.id.cbTerms);
 
+        setUpCourseSpinner();
         setUpListeners();
+
         tvLevelValue.setText(String.valueOf(sbLevel.getProgress()));
+    }
+
+    private void setUpCourseSpinner() {
+        ArrayAdapter<CharSequence> adapter =
+                ArrayAdapter.createFromResource(
+                        this,
+                        R.array.courses,
+                        android.R.layout.simple_spinner_item
+                );
+
+        adapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item
+        );
+
+        spCourse.setAdapter(adapter);
     }
 
     private void setUpListeners() {
@@ -66,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
                 btnSubmit.setEnabled(isChecked));
 
         btnBirthDate.setOnClickListener(v -> showDatePicker());
-
         btnSubmit.setOnClickListener(v -> showSummary());
 
         sbLevel.setOnSeekBarChangeListener(
@@ -122,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 ? getString(R.string.yes_short)
                 : getString(R.string.no_short);
 
-        String summary = getString(
+        tvSummary.setText(getString(
                 R.string.summary_format,
                 name,
                 email,
@@ -131,9 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 mode,
                 sbLevel.getProgress(),
                 newsletter
-        );
-
-        tvSummary.setText(summary);
+        ));
     }
 
     private void showDatePicker() {
@@ -145,11 +152,8 @@ public class MainActivity extends AppCompatActivity {
                     birthDate = String.format(
                             Locale.US,
                             "%04d-%02d-%02d",
-                            year,
-                            month + 1,
-                            dayOfMonth
+                            year, month + 1, dayOfMonth
                     );
-
                     btnBirthDate.setText(birthDate);
                 },
                 calendar.get(Calendar.YEAR),
